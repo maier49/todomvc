@@ -1,7 +1,8 @@
 import { create, tsx } from '@dojo/framework/widget-core/tsx';
 import { uuid } from '@dojo/framework/core/util';
 import { createStoreMiddleware } from '@dojo/framework/widget-core/middleware/store';
-import { createCommandFactory, createProcess } from '@dojo/framework/stores/process';
+import { createCommandFactory, createProcessFactoryWith } from '@dojo/framework/stores/process';
+import { load, collector } from '@dojo/framework/stores/middleware/localStorage';
 
 import * as css from './App.m.css';
 
@@ -19,7 +20,8 @@ interface State {
 	editingLabel?: string;
 }
 
-const store = createStoreMiddleware<State>();
+const createProcess = createProcessFactoryWith([collector('todo', (path) => [path('todos'), path('completedCount')])]);
+const store = createStoreMiddleware<State>((store: any) => load('todo', store));
 const commandFactory = createCommandFactory<State>();
 const createWidget = create({ store });
 
@@ -36,9 +38,34 @@ const deleteTodoCommand = commandFactory<{ id: string }>(({ state, payload: { id
 	if (state.todos) {
 		const index = state.todos.findIndex((todo) => todo.id === id);
 		if (index !== -1) {
+			if (state.todos[index].completed && state.completedCount) {
+				state.completedCount = state.completedCount - 1;
+			}
 			state.todos.splice(index, 1);
 		}
 	}
+});
+
+const clearCompletedCommand = commandFactory(({ state }) => {
+	if (state.todos) {
+		const newTodos = [];
+		for (let i = 0; i < state.todos.length; i++) {
+			const todo = state.todos[i];
+			if (!todo.completed) {
+				newTodos.push({ id: todo.id, label: todo.label });
+			}
+		}
+		state.todos = newTodos;
+		// debugger;
+		// while (true) {
+		// 	let index = state.todos.findIndex((todo) => !!todo.completed);
+		// 	if (index === -1) {
+		// 		break;
+		// 	}
+		// 	state.todos.splice(index, 1);
+		// }
+	}
+	state.completedCount = 0;
 });
 
 const toggleTodoCommand = commandFactory<{ id: string }>(({ state, payload: { id } }) => {
@@ -111,6 +138,7 @@ const todoEditMode = createProcess('edit-mode-todo', [todoEditModeCommand]);
 const todoReadMode = createProcess('read-mode-todo', [todoReadModeCommand]);
 const saveTodo = createProcess('save-todo', [saveTodoCommand, todoReadModeCommand]);
 const updateTodoInput = createProcess('update-todo-input', [updateTodoCommand]);
+const clearCompleted = createProcess('clear-completed', [clearCompletedCommand]);
 
 export default createWidget(({ middleware }) => {
 	const { get, path, executor } = middleware.store;
@@ -212,7 +240,9 @@ export default createWidget(({ middleware }) => {
 					<strong>{`${todos.length - completedCount} `}</strong>
 					<span>items left</span>
 				</span>
-				{completedCount && <button classes={[css.clearCompleted]}>Clear Completed</button>}
+				{completedCount && <button onclick={() => {
+					executor(clearCompleted)({});
+				}} classes={[css.clearCompleted]}>Clear Completed</button>}
 			</footer>
 		</section>
 	);

@@ -3,29 +3,29 @@
 		"build-time-render": {
 			"root": "app"
 		},
-			"pwa": {
-				"manifest": {
-					"name": "todo-MVC",
-					"short_name": "todo-MVC",
-					"description": "todo-MVC",
-					"background_color": "#ffffff",
-					"theme_color": "#222127",
-					"icons": [
-						{
-							"src": "src/logo.png",
-							"sizes": [
-								128,
-								256,
-								512
-							]
-						}
+		"pwa": {
+			"manifest": {
+				"name": "todo-MVC",
+				"short_name": "todo-MVC",
+				"description": "todo-MVC",
+				"background_color": "#ffffff",
+				"theme_color": "#222127",
+				"icons": [
+				{
+					"src": "src/logo.png",
+					"sizes": [
+						128,
+						256,
+						512
 					]
-				},
-				"serviceWorker": {
-					"clientsClaim": true
 				}
+				]
+			},
+			"serviceWorker": {
+				"clientsClaim": true
 			}
+		}
 	},
-		"test-intern": {},
-		"create-app": {}
+	"test-intern": {},
+	"create-app": {}
 }

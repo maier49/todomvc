@@ -17,7 +17,7 @@
 	},
 	"devDependencies": {
 		"@dojo/cli": "^5.0.0",
-		"@dojo/cli-build-app": "^5.0.0",
+		"@dojo/cli-build-app": "6.0.0-alpha.1",
 		"@dojo/cli-test-intern": "^5.0.0",
 		"@types/node": "~9.6.5",
 		"prettier": "1.17.1",
