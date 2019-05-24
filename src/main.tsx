@@ -4,4 +4,4 @@ import { tsx } from '@dojo/framework/widget-core/tsx';
 import App from './App';
 
 const r = renderer(() => <App />);
-r.mount();
+r.mount({ domNode: document.getElementById('app')! });
