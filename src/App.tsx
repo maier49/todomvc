@@ -1,6 +1,5 @@
 import { create, tsx } from '@dojo/framework/widget-core/tsx';
 import { uuid } from '@dojo/framework/core/util';
-import { find, findIndex } from '@dojo/framework/shim/array';
 import { createStoreMiddleware } from '@dojo/framework/widget-core/middleware/store';
 import { createCommandFactory, createProcess } from '@dojo/framework/stores/process';
 
@@ -35,7 +34,7 @@ const addTodoCommand = commandFactory<{ label: string }>(({ state, payload: { la
 
 const deleteTodoCommand = commandFactory<{ id: string }>(({ state, payload: { id } }) => {
 	if (state.todos) {
-		const index = findIndex(state.todos, (todo) => todo.id === id);
+		const index = state.todos.findIndex((todo) => todo.id === id);
 		if (index !== -1) {
 			state.todos.splice(index, 1);
 		}
@@ -44,7 +43,7 @@ const deleteTodoCommand = commandFactory<{ id: string }>(({ state, payload: { id
 
 const toggleTodoCommand = commandFactory<{ id: string }>(({ state, payload: { id } }) => {
 	if (state.todos) {
-		const index = findIndex(state.todos, (todo) => todo.id === id);
+		const index = state.todos.findIndex((todo) => todo.id === id);
 		if (index !== -1) {
 			const completed = state.todos[index].completed;
 			let completedCount = state.completedCount || 0;
@@ -92,7 +91,7 @@ const todoReadModeCommand = commandFactory(({ state, payload: { id, label } }) =
 
 const saveTodoCommand = commandFactory(({ state }) => {
 	if (state.todos) {
-		const todo = find(state.todos, (todo) => todo.id === state.editingId);
+		const todo = state.todos.find((todo) => todo.id === state.editingId);
 		if (state.editingLabel && todo) {
 			todo.label = state.editingLabel;
 		}
