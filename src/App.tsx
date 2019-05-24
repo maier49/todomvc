@@ -25,8 +25,8 @@ const store = createStoreMiddleware<State>((store: any) => load('todo', store));
 const commandFactory = createCommandFactory<State>();
 const createWidget = create({ store });
 
-function findTodo(id: string) {
-	return (todo) => todo.id === id;
+function findTodo(id?: string) {
+	return (todo: Todo) => todo.id === id;
 }
 
 const addTodoCommand = commandFactory<{ label: string }>(({ state, payload: { label } }) => {
@@ -114,7 +114,7 @@ const todoReadModeCommand = commandFactory(({ state }) => {
 
 const saveTodoCommand = commandFactory(({ state }) => {
 	if (state.todos) {
-		const todo = state.todos.find(findTodo(state.editingLabel));
+		const todo = state.todos.find(findTodo(state.editingId));
 		if (state.editingLabel && todo) {
 			todo.label = state.editingLabel;
 		}
