@@ -1,5 +1,4 @@
 import { create, tsx } from '@dojo/framework/widget-core/tsx';
-import { uuid } from '@dojo/framework/core/util';
 import { createStoreMiddleware } from '@dojo/framework/widget-core/middleware/store';
 import { createCommandFactory, createProcessFactoryWith } from '@dojo/framework/stores/process';
 import { load, collector } from '@dojo/framework/stores/middleware/localStorage';
@@ -20,13 +19,18 @@ interface State {
 	editingLabel?: string;
 }
 
+let counter = 0;
 const createProcess = createProcessFactoryWith([collector('todo', (path) => [path('todos'), path('completedCount')])]);
 const store = createStoreMiddleware<State>((store: any) => load('todo', store));
 const commandFactory = createCommandFactory<State>();
 const createWidget = create({ store });
 
+function findTodo(id: string) {
+	return (todo) => todo.id === id;
+}
+
 const addTodoCommand = commandFactory<{ label: string }>(({ state, payload: { label } }) => {
-	const id = uuid();
+	const id = `${Date.now()}-${counter++}`;
 	if (state.todos) {
 		state.todos.push({ id, label });
 	} else {
@@ -36,7 +40,7 @@ const addTodoCommand = commandFactory<{ label: string }>(({ state, payload: { la
 
 const deleteTodoCommand = commandFactory<{ id: string }>(({ state, payload: { id } }) => {
 	if (state.todos) {
-		const index = state.todos.findIndex((todo) => todo.id === id);
+		const index = state.todos.findIndex(findTodo(id));
 		if (index !== -1) {
 			if (state.todos[index].completed && state.completedCount) {
 				state.completedCount = state.completedCount - 1;
@@ -56,21 +60,13 @@ const clearCompletedCommand = commandFactory(({ state }) => {
 			}
 		}
 		state.todos = newTodos;
-		// debugger;
-		// while (true) {
-		// 	let index = state.todos.findIndex((todo) => !!todo.completed);
-		// 	if (index === -1) {
-		// 		break;
-		// 	}
-		// 	state.todos.splice(index, 1);
-		// }
 	}
 	state.completedCount = 0;
 });
 
 const toggleTodoCommand = commandFactory<{ id: string }>(({ state, payload: { id } }) => {
 	if (state.todos) {
-		const index = state.todos.findIndex((todo) => todo.id === id);
+		const index = state.todos.findIndex(findTodo(id));
 		if (index !== -1) {
 			const completed = state.todos[index].completed;
 			let completedCount = state.completedCount || 0;
@@ -111,14 +107,14 @@ const todoEditModeCommand = commandFactory<{ id: string; label: string }>(({ sta
 	state.editingLabel = label;
 });
 
-const todoReadModeCommand = commandFactory(({ state, payload: { id, label } }) => {
+const todoReadModeCommand = commandFactory(({ state }) => {
 	state.editingId = undefined;
 	state.editingLabel = undefined;
 });
 
 const saveTodoCommand = commandFactory(({ state }) => {
 	if (state.todos) {
-		const todo = state.todos.find((todo) => todo.id === state.editingId);
+		const todo = state.todos.find(findTodo(state.editingLabel));
 		if (state.editingLabel && todo) {
 			todo.label = state.editingLabel;
 		}
