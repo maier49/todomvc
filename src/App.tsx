@@ -1,5 +1,5 @@
-import { create, tsx } from '@dojo/framework/widget-core/tsx';
-import { createStoreMiddleware } from '@dojo/framework/widget-core/middleware/store';
+import { create, tsx } from '@dojo/framework/core/vdom';
+import { createStoreMiddleware } from '@dojo/framework/core/middleware/store';
 import { createCommandFactory, createProcessFactoryWith } from '@dojo/framework/stores/process';
 import { load, collector } from '@dojo/framework/stores/middleware/localStorage';
 
@@ -51,7 +51,9 @@ const deleteTodoCommand = commandFactory<{ id: string }>(({ state, payload: { id
 });
 
 const clearCompletedCommand = commandFactory(({ state }) => {
-	if (state.todos) {
+
+	// Uncomment to show correct behaviour
+	/*if (state.todos) {
 		const newTodos = [];
 		for (let i = 0; i < state.todos.length; i++) {
 			const todo = state.todos[i];
@@ -60,6 +62,12 @@ const clearCompletedCommand = commandFactory(({ state }) => {
 			}
 		}
 		state.todos = newTodos;
+	}
+	state.completedCount = 0;*/
+
+	// This causes an maximum call stack exceeded error when clearing completed todos
+	if (state.todos) {
+		state.todos = state.todos.filter((todo) => !todo.completed);
 	}
 	state.completedCount = 0;
 });
